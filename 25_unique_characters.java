@@ -5,6 +5,71 @@
 // List of string with length of 5 each
 // intput = ["abcde", "fghij", "klmno", "pqrst", "uvwxy", "zabcd", "apple", "zebra", "ocean", "quick", "world", "jumps", "foxes", "liver"]
 
+// Without Bit Masking DP solution
+
+import java.util.*;
+
+public class UniqueWordsSelector {
+    public List<String> solution(String[] strs) {
+        Map<String, List<String>> memo = new HashMap<>();
+        return dfs(0, 0, strs, new HashSet<>(), memo);
+    }
+
+    private List<String> dfs(int i, int curWordsCount, String[] strs, Set<Character> charsUsed, Map<String, List<String>> memo) {
+        // Base case: If 5 words are selected, return an empty list
+        if (curWordsCount == 5) return new ArrayList<>();
+        // Base case: If all words are processed, return null
+        if (i == strs.length) return null;
+
+        // Memoization key: Current index, word count, and characters used
+        String memoKey = i + "|" + curWordsCount + "|" + charsUsed;
+        if (memo.containsKey(memoKey)) return memo.get(memoKey);
+
+        // Skip the current word and move to the next
+        List<String> result = dfs(i + 1, curWordsCount, strs, charsUsed, memo);
+        if (result != null) {
+            memo.put(memoKey, result);
+            return result;
+        }
+
+        // Check if the current word can be added
+        if (canAdd(i, strs, charsUsed)) {
+            // Add current word's characters to the set
+            for (char c : strs[i].toCharArray()) charsUsed.add(c);
+
+            // Recursively try including the current word
+            result = dfs(i + 1, curWordsCount + 1, strs, charsUsed, memo);
+            if (result != null) {
+                result.add(strs[i]); // Add the word to the result
+                memo.put(memoKey, result);
+                return result;
+            }
+
+            // Backtrack: Remove the characters of the current word
+            for (char c : strs[i].toCharArray()) charsUsed.remove(c);
+        }
+
+        // Cache and return null if no solution is found
+        memo.put(memoKey, null);
+        return null;
+    }
+
+    private boolean canAdd(int i, String[] strs, Set<Character> charsUsed) {
+        for (char c : strs[i].toCharArray()) {
+            if (charsUsed.contains(c)) return false;
+        }
+        return true;
+    }
+
+    public static void main(String[] args) {
+        UniqueWordsSelector selector = new UniqueWordsSelector();
+        String[] strs = {"abcde", "klmno", "pqrst", "uvwxy", "zabcd", "apple", "zebra", "fghij"};
+        List<String> result = selector.solution(strs);
+        System.out.println(result);
+    }
+}
+
+// With Bit Masking DP solution
 
 import java.util.*;
 class Main {
